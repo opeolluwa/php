@@ -15,6 +15,7 @@ use yii\mail\MailerInterface;
 use yii\web\Controller;
 use yii\web\ErrorAction;
 use yii\web\Response;
+use app\models\EntryForm;
 
 class SiteController extends Controller
 {
@@ -34,21 +35,21 @@ class SiteController extends Controller
     public function behaviors(): array
     {
         return [
-            'access' => [
-                'class' => AccessControl::class,
-                'only' => ['logout'],
-                'rules' => [
+            "access" => [
+                "class" => AccessControl::class,
+                "only" => ["logout"],
+                "rules" => [
                     [
-                        'actions' => ['logout'],
-                        'allow' => true,
-                        'roles' => ['@'],
+                        "actions" => ["logout"],
+                        "allow" => true,
+                        "roles" => ["@"],
                     ],
                 ],
             ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['post'],
+            "verbs" => [
+                "class" => VerbFilter::class,
+                "actions" => [
+                    "logout" => ["post"],
                 ],
             ],
         ];
@@ -60,13 +61,13 @@ class SiteController extends Controller
     public function actions(): array
     {
         return [
-            'error' => [
-                'class' => ErrorAction::class,
+            "error" => [
+                "class" => ErrorAction::class,
             ],
-            'captcha' => [
-                'class' => CaptchaAction::class,
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
-                'transparent' => true,
+            "captcha" => [
+                "class" => CaptchaAction::class,
+                "fixedVerifyCode" => YII_ENV_TEST ? "testme" : null,
+                "transparent" => true,
             ],
         ];
     }
@@ -78,7 +79,7 @@ class SiteController extends Controller
      */
     public function actionIndex(): string
     {
-        return $this->render('index');
+        return $this->render("index");
     }
 
     /**
@@ -98,9 +99,9 @@ class SiteController extends Controller
             return $this->goBack();
         }
 
-        $model->password = '';
+        $model->password = "";
 
-        return $this->render('login', ['model' => $model]);
+        return $this->render("login", ["model" => $model]);
     }
 
     /**
@@ -124,23 +125,25 @@ class SiteController extends Controller
     {
         $model = new ContactForm();
 
-        $contact = $model->load($this->request->post()) && $model->contact(
-            $this->mailer,
-            Yii::$app->params['adminEmail'],
-            Yii::$app->params['senderEmail'],
-            Yii::$app->params['senderName'],
-        );
+        $contact =
+            $model->load($this->request->post()) &&
+            $model->contact(
+                $this->mailer,
+                Yii::$app->params["adminEmail"],
+                Yii::$app->params["senderEmail"],
+                Yii::$app->params["senderName"],
+            );
 
         if ($contact) {
             Yii::$app->session->setFlash(
-                'success',
-                'Thank you for contacting us. We will respond to you as soon as possible.',
+                "success",
+                "Thank you for contacting us. We will respond to you as soon as possible.",
             );
 
             return $this->refresh();
         }
 
-        return $this->render('contact', ['model' => $model]);
+        return $this->render("contact", ["model" => $model]);
     }
 
     /**
@@ -150,6 +153,49 @@ class SiteController extends Controller
      */
     public function actionAbout(): string
     {
-        return $this->render('about');
+        return $this->render("about");
+    }
+
+    /**
+     * Displays a message.
+     *
+     * @param string $message
+     * @return string
+     */
+    public function actionSay($message = "Hello"): string
+    {
+        return $this->render("say", ["message" => $message]);
+    }
+
+    /**
+     * Displays a message.
+     *
+     * @param string $message
+     * @return string
+     */
+    public function actionGreetIdan($message = "Hello"): string
+    {
+        return $this->render("idan", ["message" => $message]);
+    }
+
+    /**
+     * Displays the entry form and handles the form submission.
+     *
+     * @return string
+     */
+    public function actionEntry()
+    {
+        $model = new EntryForm();
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            // valid data received in $model
+
+            // do something meaningful here about $model ...
+
+            return $this->render("entry-confirm", ["model" => $model]);
+        } else {
+            // either the page is initially displayed or there is some validation error
+            return $this->render("entry", ["model" => $model]);
+        }
     }
 }
